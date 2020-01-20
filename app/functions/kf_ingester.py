@@ -125,14 +125,17 @@ def kf_ingest(request):
                   "processed_timestamp"   : datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                 }
         topic_name = os.getenv('KF_OCM_EVALUATE')
+        #topic_name  = os.getenv('KF_BLOWHOLE')
 
         try:
             future = publish(topic_name, crate)
             result = future.result(timeout=10)
             print(f'Published message to KF_OCM_EVALUATE -- message_id: {message_id} topic: {topic_name} result: {result}')
+            #print(f'Published message to KF_BLOWHOLE -- message_id: {message_id} topic: {topic_name} result: {result}')
 
             #return make_response("Received OCM\n", 202)
         except Exception as exception:
              print(f'Encountered error while publishing to KF_OCM_EVALUATE -- message_id: {message_id} topic: {topic_name} exception: {exception}')
+             #print(f'Encountered error while publishing to KF_BLOWHOLE -- message_id: {message_id} topic: {topic_name} exception: {exception}')
              #return make_response('Unexpected server error.\n', 500)
 

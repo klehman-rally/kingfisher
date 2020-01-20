@@ -11,16 +11,24 @@ TEMPLATE_DB_URL = "postgresql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?host=/cloudsq
 #
 #setVariables('environment/dev.env.yml')
 
+WEBHOOK_ATTRIBUTES   = 'id,sub_id,name,target_url,object_types,conditions'
+CONDITION_ATTRIBUTES = 'id,sub_id,attribute_uuid,attribute_name,operator,value'
+
+SELECT = {'webhook'   : WEBHOOK_ATTRIBUTES,
+          'condition' : CONDITION_ATTRIBUTES
+         }
+
 #####################################################################################################
 
 def getQualifiers(target_table, sub_id):
-    if target_table == 'condition':
-        columns = 'id,sub_id,attribute_uuid,attribute_name,operator,value'
-    else:
-        columns = 'id,sub_id,name,target_url,object_types,conditions'
-    criteria  = [('sub_id', '=', f'%(sub_id)s')]
-    query_data = {'sub_id' : sub_id }
-    conditions = 'WHERE '
+    #if target_table == 'condition':
+    #    columns = 'id,sub_id,attribute_uuid,attribute_name,operator,value'
+    #else:
+    #    columns = 'id,sub_id,name,target_url,object_types,conditions'
+    columns = SELECT[target_table]
+    criteria    = [('sub_id', '=', f'%(sub_id)s')]
+    query_data  = {'sub_id' : sub_id }
+    conditions  = 'WHERE '
     conditions += ' AND '.join([f'{item} {relation} {value_holder}' for item, relation, value_holder in criteria])
     dbconn = dbConnection()
     rows = []
@@ -55,10 +63,8 @@ def dbConnection():
     database_uri = TEMPLATE_DB_URL.format( GCP_PROJECT=gcp_project, GCP_ZONE=gcp_zone,
                                            GCLOUD_SQL_INSTANCE=db_instance, DB_NAME=db_name,
                                            DB_USER=db_user, DB_PASSWORD=db_password)
-    print("Database URI: %s" % database_uri)
+    #print("Database URI: %s" % database_uri)
     # connect to the PostgreSQL server
-    #dbconn = psycopg2.connect(database_uri)
-    #return dbconn
 
     try:
        dbconn = psycopg2.connect(database_uri)
