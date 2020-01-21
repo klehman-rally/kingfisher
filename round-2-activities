@@ -1,0 +1,74 @@
+
+GCP/GCF based Rally webhooks Winter 2020
+
+Performance
+
+    100,000/hour processing rate for webhooks (ingestion, evaluation, firing)
+
+
+Monitoring
+    volume over time period (1 min, 5 min, 10 min)
+      total/successes/failures
+    count group per sub, per artifact type
+    number of scaled functions per time period
+     
+
+Replay
+
+    o -  initial automated level
+           0, 2, 10 seconds
+
+    o -  secondary customer initiated level
+           display of undelivered webhooks, by time order, workspace division, artifact grouping
+           selection of replays, result of replay attempt
+           max of 3 user retries
+
+     7 day depth of storage
+
+     vendor / customer centric view of replay metrics
+        1,5,10,30 minute , 1, 4, 8  hour, yesterday, today
+           replayable, successful, failed
+        vendor top 10 in terms of volume, failures, successes
+
+
+Reporting
+   
+    Total volume over all customers for last n days per day
+    Top volume by sub_id over last n days by hour 
+
+----------------------------------------------------------------------------------------------------------
+     
+Performance testing
+   ingestion
+         Throw ~100K OCM like messages at the ingester in an hour timeframe (roughly spread evenly over the hour)
+         metric: 99.9% of messages have been published to dest topic after 60 minutes
+          adjust this to limit the time period to 10 minutes, matching the per hour rate (~17000 messages / 10 min)
+         how can you tell how many messages are in the topic?
+           in the GCP Console, for the project, nav to the target PubSub Subscription
+            there will be an Unacked message count chart
+
+         actual testing
+            a rate of ~100K/hour is roughly equivalent to ~17K per 10 minutes
+            when a function invocation limit of 100 was set for the ingestion function with 1 GB memory limit
+            using 30 simultaneous posters, the function processed them in 8:33 for a rate that 
+            approaches 120K/hour with 4 failures
+
+         speculation 
+            a truer test of capacity would have traffic originating from various machines/networks
+
+   evaluation
+         ~100K in an hour for a distribution of:
+              40%  discarded for no webhooks applicable
+              30%  have any conditions that don't match
+              30%  have any conditions that do    match
+
+          metric: 99.9% of messages have been subject to evaluation processing
+
+   firing
+        ~100K in an hour for distribution of:
+             95% valid request endpoints
+              3% request failures (not timeout, 503, 404, no route, etc) 
+              2% request timeouts at 5 seconds
+        metric: 99.9% of all requests handled
+
+        

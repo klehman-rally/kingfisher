@@ -1,0 +1,25 @@
+
+The initial aim is to stress a Google Cloud Function that is HTTP triggered and whose task is mostly limited to
+publishing the message that is given to it to a Google PubSub Topic.
+
+A message should be ~20K in size
+
+There should be these levels of parallelism for message producers/posters:
+    1
+    2
+    4
+   10
+
+
+Any producer should be provided at startup time at least two arguments:
+     total number of messages, rate per second 
+     optional messages might be pairs of message-types/% of the whole
+     with a default message type for a "normal" message and a percentage of 100%
+     any optional non-normal messages would take a chunk of that 100% 
+
+
+There should be some mechanism to uniquely identify the parallelism element sending the message as 
+well as a unique sequence number for the message from that element.
+ 
+   bonus changing various attribute values for the message
+  
